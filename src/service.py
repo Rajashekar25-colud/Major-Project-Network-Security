@@ -48,7 +48,7 @@ def is_state_table(df: pd.DataFrame, config: dict[str, Any]) -> bool:
 def states_from_upload(name: str, data: bytes, config: dict[str, Any]) -> tuple[pd.DataFrame, dict[str, Any]]:
     """Uploaded file (state table CSV, flow CSV or PCAP) -> regularised states + info."""
     suffix = Path(name).suffix.lower()
-    if suffix in (".pcap", ".pcapng", ".cap"):
+    if suffix in (".pcap", ".cap"):
         with tempfile.NamedTemporaryFile(suffix=suffix, delete=False) as f:
             f.write(data); tmp = f.name
         try:

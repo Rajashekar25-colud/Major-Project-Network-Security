@@ -73,8 +73,8 @@ class WindowAccumulator:
         proto = c["protocol"]
         d["tcp"] = (proto == 6).astype(float)
         d["udp"] = (proto == 17).astype(float)
-        d["icmp"] = proto.isin([1, 58]).astype(float)
-        d["oth"] = (~proto.isin([1, 6, 17, 58])).astype(float)
+        d["icmp"] = (proto == 1).astype(float)
+        d["oth"] = (~proto.isin([1, 6, 17])).astype(float)
         dsec = d["dur"].clip(lower=1e-3)
         d["prate"] = (pk / dsec).clip(upper=self.rate_clip)
         d["brate"] = (d["pay"] / dsec).clip(upper=self.rate_clip)

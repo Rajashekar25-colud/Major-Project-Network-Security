@@ -18,7 +18,7 @@ from ..evaluation.metrics import choose_threshold, onset_masks
 from ..features.preprocess import Preprocessor
 from .inference import Forecaster
 from .sequences import (future_targets, gather, sample_ends, split_labels, stage_ids, stage_vocab)
-from .world_model import WorldModel, multitask_loss
+from .world_model import build_model, multitask_loss
 
 
 def seed_everything(seed: int) -> None:
@@ -83,7 +83,7 @@ def train_from_states(states: pd.DataFrame, config: dict[str, Any], out_dir: str
     pos = float(ytr_atk.sum()); neg = float(ytr_atk.size - pos)
     pos_w = float(np.clip(neg / max(pos, 1.0), 1.0, 10.0))
     dev = "cuda" if torch.cuda.is_available() else "cpu"
-    model = WorldModel(len(names), S, H, cfg_m["hidden_size"], cfg_m["layers"], cfg_m["dropout"], cfg_m["attention_heads"]).to(dev)
+    model = build_model(cfg_m.get("type", "lstm"), len(names), S, H, cfg_m).to(dev)
     opt = torch.optim.AdamW(model.parameters(), lr=cfg_m["learning_rate"], weight_decay=cfg_m["weight_decay"])
     sched = torch.optim.lr_scheduler.ReduceLROnPlateau(opt, factor=0.5, patience=2)
     act = torch.tensor(pre.active, dtype=torch.float32, device=dev)
@@ -136,7 +136,7 @@ def train_from_states(states: pd.DataFrame, config: dict[str, Any], out_dir: str
 
     # ---- calibrate warning threshold on the validation split ----
     meta_stub = {"window": cfg_w, "feature_names": names, "stage_names": vocab, "model": {
-        "hidden_size": cfg_m["hidden_size"], "layers": cfg_m["layers"], "dropout": cfg_m["dropout"],
+        "type": cfg_m.get("type", "lstm"), "hidden_size": cfg_m["hidden_size"], "layers": cfg_m["layers"], "dropout": cfg_m["dropout"],
         "attention_heads": cfg_m["attention_heads"]}, "preprocessing": pre.to_dict(), "warning_threshold": 0.5}
     fc = Forecaster(model, meta_stub)
     vp = fc.predict_batch(X, va)

@@ -107,7 +107,7 @@ with st.sidebar:
     src_choice = st.selectbox("Replay source", choices, index=min(default_i, len(choices) - 1))
     states = None; src_label = ""
     if src_choice.startswith("Upload"):
-        up = st.file_uploader("Flow CSV, prepared state CSV or PCAP / PCAPNG", type=["csv", "pcap", "pcapng", "cap"])
+        up = st.file_uploader("Flow CSV, prepared state CSV or PCAP", type=["csv", "pcap", "cap"])
         sample = ROOT / "data" / "sample" / "sample_traffic.pcap"
         if sample.exists() and st.button("Use bundled sample PCAP", width="stretch"):
             ss["upload_name"], ss["upload_bytes"] = sample.name, sample.read_bytes()
@@ -120,7 +120,6 @@ with st.sidebar:
                 src_label = f"{ss['upload_name']} ({uinfo['kind']})"
             except Exception as e:
                 st.error(f"Could not read this file: {e}")
-                st.caption("Tip: run `python scripts/pcap_info.py --pcap <file>` to see what the capture contains.")
     else:
         p = ROOT / "data" / "states" / src_choice
         states = _states_file(str(p), p.stat().st_mtime); src_label = src_choice

@@ -18,62 +18,21 @@ from .schema import BENIGN
 
 _MAGIC = {b"\xd4\xc3\xb2\xa1": ("<", 1e-6), b"\xa1\xb2\xc3\xd4": (">", 1e-6),
           b"\x4d\x3c\xb2\xa1": ("<", 1e-9), b"\xa1\xb2\x3c\x4d": (">", 1e-9)}
-_PCAPNG = b"\x0a\x0d\x0d\x0a"
 
 
 def _iter_pcap(path: Path) -> Iterator[tuple[float, bytes, int]]:
     with open(path, "rb") as f:
         head = f.read(24)
         if len(head) < 24 or head[:4] not in _MAGIC:
-            raise ValueError("Not a classic .pcap file")
+            raise ValueError("Not a classic .pcap file (pcapng needs scapy: pip install scapy)")
         end, res = _MAGIC[head[:4]]
-        linktype = struct.unpack(end + "I", head[20:24])[0] & 0x0FFFFFFF
+        linktype = struct.unpack(end + "I", head[20:24])[0]
         while True:
             h = f.read(16)
             if len(h) < 16:
                 return
             sec, frac, caplen, _ = struct.unpack(end + "IIII", h)
             yield sec + frac * res, f.read(caplen), linktype
-
-
-def _iter_pcapng(path: Path) -> Iterator[tuple[float, bytes, int]]:
-    """Minimal pcapng reader (SHB / IDB / EPB / SPB) - enough for Wireshark / tcpdump captures."""
-    end = "<"
-    ifaces: list[tuple[int, float]] = []
-    with open(path, "rb") as f:
-        while True:
-            h = f.read(8)
-            if len(h) < 8:
-                return
-            btype = struct.unpack(end + "I", h[:4])[0]
-            if h[:4] == _PCAPNG:                         # section header: learn byte order
-                blen_raw = h[4:8]
-                bom = f.read(4)
-                end = "<" if struct.unpack("<I", bom)[0] == 0x1A2B3C4D else ">"
-                blen = struct.unpack(end + "I", blen_raw)[0]
-                f.read(blen - 12); ifaces = []
-                continue
-            blen = struct.unpack(end + "I", h[4:8])[0]
-            body = f.read(max(blen - 12, 0)); f.read(4)
-            if btype == 1 and len(body) >= 8:            # interface description
-                lt = struct.unpack(end + "H", body[:2])[0]; res = 1e-6
-                o = 8
-                while o + 4 <= len(body):
-                    code, ln = struct.unpack(end + "HH", body[o:o + 4])
-                    if code == 0:
-                        break
-                    if code == 9 and ln >= 1:            # if_tsresol
-                        v = body[o + 4]
-                        res = 2.0 ** -(v & 0x7F) if v & 0x80 else 10.0 ** -(v & 0x7F)
-                    o += 4 + ((ln + 3) & ~3)
-                ifaces.append((lt, res))
-            elif btype == 6 and len(body) >= 20:         # enhanced packet
-                iid, th, tl, cap, _ = struct.unpack(end + "IIIII", body[:20])
-                lt, res = ifaces[iid] if iid < len(ifaces) else (1, 1e-6)
-                yield ((th << 32) | tl) * res, body[20:20 + cap], lt
-            elif btype == 3 and len(body) >= 4:          # simple packet
-                lt, _ = ifaces[0] if ifaces else (1, 1e-6)
-                yield 0.0, body[4:], lt
 
 
 def _iter_scapy(path: Path) -> Iterator[tuple[float, bytes, int]]:  # pragma: no cover
@@ -83,73 +42,30 @@ def _iter_scapy(path: Path) -> Iterator[tuple[float, bytes, int]]:  # pragma: no
             yield float(p.time), bytes(p), 1
 
 
-def _ip_offset(buf: bytes, lt: int) -> int | None:
-    """Offset of the IP header for a link type (None = not IP / unknown)."""
-    if lt == 1:                                         # Ethernet (+ optional 802.1Q / QinQ)
+def parse_packet(buf: bytes, linktype: int):
+    """-> (proto, src, dst, sport, dport, ttl, win, flags, payload_len, seq, ip_len) or None (IPv4 only)."""
+    if linktype == 1:
         if len(buf) < 14:
             return None
         et = struct.unpack("!H", buf[12:14])[0]; off = 14
-        while et in (0x8100, 0x88A8) and len(buf) >= off + 4:
-            et = struct.unpack("!H", buf[off + 2:off + 4])[0]; off += 4
-        return off if et in (0x0800, 0x86DD) else None
-    if lt == 0:                                         # BSD loopback / null
-        return 4
-    if lt == 113:                                       # Linux cooked v1
-        return 16
-    if lt == 276:                                       # Linux cooked v2
-        return 20
-    if lt in (101, 12, 14, 228, 229):                   # raw IP
-        return 0
-    for off in (0, 14, 4, 16, 20):                      # unknown link type: sniff
-        if len(buf) > off and (buf[off] >> 4) in (4, 6) and (
-                (buf[off] >> 4 == 4 and (buf[off] & 15) >= 5) or (buf[off] >> 4 == 6 and len(buf) >= off + 40)):
-            return off
-    return None
-
-
-def _ipv6_ext(ip: bytes) -> tuple[int, int]:
-    nh, off = ip[6], 40
-    for _ in range(8):
-        if nh in (0, 43, 60) and len(ip) >= off + 2:
-            nh, off = ip[off], off + (ip[off + 1] + 1) * 8
-        elif nh == 44 and len(ip) >= off + 8:
-            nh, off = ip[off], off + 8
-        elif nh == 51 and len(ip) >= off + 2:
-            nh, off = ip[off], off + (ip[off + 1] + 2) * 4
-        else:
-            break
-    return nh, off
-
-
-def parse_packet(buf: bytes, linktype: int):
-    """-> (proto, src, dst, sport, dport, ttl, win, flags, payload_len, seq, ip_len) or None."""
-    off = _ip_offset(buf, linktype)
-    if off is None:
-        return None
-    ip = buf[off:]
-    if not ip:
-        return None
-    ver = ip[0] >> 4
-    if ver == 4:
-        if len(ip) < 20:
+        if et == 0x8100 and len(buf) >= 18:
+            et = struct.unpack("!H", buf[16:18])[0]; off = 18
+        if et != 0x0800:
             return None
-        ihl = (ip[0] & 0x0F) * 4
-        total = struct.unpack("!H", ip[2:4])[0] or len(ip)
-        ttl, proto = ip[8], ip[9]
-        src = ".".join(map(str, ip[12:16])); dst = ".".join(map(str, ip[16:20]))
-        l4 = ip[ihl:]
-    elif ver == 6:
-        if len(ip) < 40:
-            return None
-        import socket
-        plen = struct.unpack("!H", ip[4:6])[0]
-        ttl = ip[7]
-        proto, l4off = _ipv6_ext(ip)
-        src = socket.inet_ntop(socket.AF_INET6, bytes(ip[8:24])); dst = socket.inet_ntop(socket.AF_INET6, bytes(ip[24:40]))
-        total = 40 + plen; ihl = l4off
-        l4 = ip[l4off:]
+    elif linktype == 113:
+        off = 16
+    elif linktype in (101, 12, 14):
+        off = 0
     else:
         return None
+    ip = buf[off:]
+    if len(ip) < 20 or ip[0] >> 4 != 4:
+        return None
+    ihl = (ip[0] & 0x0F) * 4
+    total = struct.unpack("!H", ip[2:4])[0]
+    ttl, proto = ip[8], ip[9]
+    src = ".".join(map(str, ip[12:16])); dst = ".".join(map(str, ip[16:20]))
+    l4 = ip[ihl:]
     sport = dport = win = flags = seq = 0
     if proto == 6 and len(l4) >= 20:
         sport, dport, seq = struct.unpack("!HHI", l4[:8])
@@ -158,24 +74,11 @@ def parse_packet(buf: bytes, linktype: int):
         payload = max(total - ihl - doff, 0)
     elif proto == 17 and len(l4) >= 8:
         sport, dport = struct.unpack("!HH", l4[:4]); payload = max(total - ihl - 8, 0)
-    elif proto in (1, 58):
+    elif proto == 1:
         payload = max(total - ihl - 8, 0)
     else:
         payload = max(total - ihl, 0)
     return proto, src, dst, sport, dport, ttl, win, flags, payload, seq, total
-
-
-def open_capture(path: Path):
-    with open(path, "rb") as f:
-        magic = f.read(4)
-    if magic in _MAGIC:
-        return _iter_pcap(path)
-    if magic == _PCAPNG:
-        return _iter_pcapng(path)
-    try:
-        return _iter_scapy(path)
-    except ImportError:
-        raise ValueError(f"{path.name}: unrecognised capture format (magic bytes {magic.hex()}). Expected .pcap or .pcapng.")
 
 
 class _Flow:
@@ -192,21 +95,20 @@ class _Flow:
 def pcap_to_flows(path: str | Path, config: dict[str, Any], idle_timeout: float = 120.0,
                   active_timeout: float = 600.0, max_packets: int | None = None) -> pd.DataFrame:
     path = Path(path)
-    gen = open_capture(path)
-    stats = {"packets": 0, "parsed": 0, "linktypes": set()}
+    with open(path, "rb") as f:
+        magic = f.read(4)
+    gen = _iter_pcap(path) if magic in _MAGIC else _iter_scapy(path)
 
     flows: dict[tuple, _Flow] = {}
     done: list[_Flow] = []
     n = 0
     for ts, buf, lt in gen:
         n += 1
-        stats["packets"] += 1; stats["linktypes"].add(lt)
         if max_packets and n > max_packets:
             break
         p = parse_packet(buf, lt)
         if p is None:
             continue
-        stats["parsed"] += 1
         proto, src, dst, sport, dport, ttl, win, flags, payload, seq, total = p
         fwd_key = (proto, src, sport, dst, dport); rev_key = (proto, dst, dport, src, sport)
         fl = flows.get(fwd_key); direction = 0
@@ -237,10 +139,7 @@ def pcap_to_flows(path: str | Path, config: dict[str, Any], idle_timeout: float 
                     fl.flags[j] += 1
     done.extend(flows.values())
     if not done:
-        raise ValueError(
-            f"No IP packets could be parsed from {path.name}: {stats['packets']} packet(s) read, link type(s) {sorted(stats['linktypes'])}. "
-            "Supported: Ethernet(+VLAN), raw IP, loopback, Linux-cooked; IPv4 and IPv6; classic pcap and pcapng. "
-            "If the packets are ARP/STP/other non-IP traffic only, there is nothing to analyse.")
+        raise ValueError("No IPv4 TCP/UDP/ICMP packets found in the capture.")
     rows = []
     for fl in done:
         t = np.asarray(fl.times); iat = np.diff(t) if len(t) > 1 else np.zeros(1)

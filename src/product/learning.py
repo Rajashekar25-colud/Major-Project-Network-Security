@@ -22,7 +22,7 @@ from ..evaluation.evaluate import evaluate_model
 from ..evaluation.metrics import choose_threshold, onset_masks
 from ..models.inference import Forecaster
 from ..models.sequences import future_targets, gather, sample_ends, split_labels, stage_ids
-from ..models.world_model import WorldModel, multitask_loss
+from ..models.world_model import build_model, multitask_loss
 from . import store
 
 VERSIONS = MODELS_DIR / "versions"
@@ -120,7 +120,7 @@ def active_version() -> str:
 # ------------------------------------------------------------------------------------------- fine-tune
 def _expand_stage_head(old: WorldModel, new_stages: int, hp: dict[str, Any]) -> WorldModel:
     H, F, S = old.horizon, old.input_size, old.num_stages
-    m = WorldModel(F, new_stages, H, hp["hidden_size"], hp["layers"], hp["dropout"], hp["attention_heads"])
+    m = build_model(hp.get("type", "lstm"), F, new_stages, H, hp)
     sd = {k: v for k, v in old.state_dict().items() if not k.startswith("stage_head.2")}
     m.load_state_dict(sd, strict=False)
     ow, ob = old.stage_head[2].weight.data, old.stage_head[2].bias.data

@@ -24,7 +24,7 @@ st.set_page_config(page_title=f"{brand['product_name']} - {brand['tagline']}", p
 
 import state
 import ui
-from views import analyze, incidents, live, model, overview, settings
+from views import analyze, incidents, live, model, overview, settings, simulate
 
 ui.inject_css()
 st.logo(str(ROOT / "app" / "assets" / "logo.svg"), size="large")
@@ -47,6 +47,7 @@ if not state.has_model():
 pages = [st.Page(overview.render, title="Overview", icon=":material/dashboard:", url_path="overview", default=True),
          st.Page(live.render, title="Live Monitor", icon=":material/monitor_heart:", url_path="live"),
          st.Page(incidents.render, title="Incidents", icon=":material/crisis_alert:", url_path="incidents"),
+         st.Page(simulate.render, title="Defence Simulation", icon=":material/science:", url_path="simulate"),
          st.Page(analyze.render, title="Analyze Traffic", icon=":material/upload_file:", url_path="analyze"),
          st.Page(model.render, title="Model & Learning", icon=":material/neurology:", url_path="model"),
          st.Page(settings.render, title="Settings", icon=":material/tune:", url_path="settings")]

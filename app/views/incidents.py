@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import numpy as np
 import pandas as pd
 import streamlit as st
 
@@ -9,6 +10,7 @@ from src.explain.explainer import explain_shap
 from src.product import store
 from src.product.analysis import incident_drivers
 from src.product.knowledge import feature_label, playbook
+from panels import flagged_traffic
 from ui import STATUS_COLOR, chip, fmt_secs, kpi_row, page_header, section, sev_chip
 
 
@@ -88,6 +90,10 @@ def render():
                 rows = rs.ends[lo:hi + 1]
                 st.plotly_chart(risk_timeline(a.states["timestamp"].iloc[rows].reset_index(drop=True), rs.dec["risk"][lo:hi + 1], a.states["segment"].to_numpy()[rows],
                                               a.threshold, match, None, height=300, title="Risk around this incident"), width="stretch")
+            section("Flagged traffic patterns during this incident")
+            k0 = int(m["k_open"]); k1 = min(k0 + max(int(m["windows"]), 3) + 2, len(a.session.ends) - 1)
+            ks = np.arange(k0, k1 + 1)
+            flagged_traffic(a.states, a.session.ends[ks], a.session.dec["risk"][ks], 12)
             with st.expander("Advanced: exact SHAP explanation"):
                 if st.button("Compute SHAP values", key=f"shap_{r['id']}"):
                     sh = explain_shap(fc, a.session.sequence(int(m["k_open"])), __import__("numpy").load(state.MODELS_DIR / "background_sequences.npy") if (state.MODELS_DIR / "background_sequences.npy").exists() else None, 10)

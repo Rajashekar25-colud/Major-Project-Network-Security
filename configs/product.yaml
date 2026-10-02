@@ -14,3 +14,17 @@ learning:
   epochs: 6
   learning_rate: 0.0002
   anchor_strength: 0.001      # pulls weights toward the current model (limits forgetting)
+
+# Defensive what-if simulation: each scenario multiplies raw traffic-state features of the model's PREDICTED future windows.
+# These are model-based simulations of how the forecast would change, not validated causal effects of real controls.
+counterfactual:
+  steps: 12
+  scenarios:
+    rate_limit:
+      label: "Rate-limit / block suspicious source"
+      description: "Cuts connection volume and removes most unanswered / scan-like connections."
+      scale: {flow_count: 0.5, packets_total: 0.5, bytes_total: 0.5, pkt_rate_mean: 0.5, byte_rate_mean: 0.5, syn_count: 0.4, unique_dst_ports: 0.4, scan_score: 0.1, failed_flow_ratio: 0.3, small_flow_ratio: 0.4, syn_ratio: 0.5, rst_ratio: 0.4}
+    isolate_host:
+      label: "Isolate affected host"
+      description: "Removes almost all traffic from the affected source."
+      scale: {flow_count: 0.1, packets_total: 0.1, bytes_total: 0.1, pkt_rate_mean: 0.1, byte_rate_mean: 0.1, syn_count: 0.05, ack_count: 0.1, rst_count: 0.1, fin_count: 0.1, psh_count: 0.1, unique_dst_ports: 0.1, scan_score: 0.0, failed_flow_ratio: 0.1, small_flow_ratio: 0.1, syn_ratio: 0.2, rst_ratio: 0.1}

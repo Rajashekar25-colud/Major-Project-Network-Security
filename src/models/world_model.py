@@ -76,3 +76,40 @@ def multitask_loss(out, y_state, y_stage, y_attack, active_mask, class_weight, p
     at = F.binary_cross_entropy_with_logits(out["attack_logit"], y_attack, pos_weight=pos_weight)
     total = w_state * st + w_stage * sl + w_attack * at
     return total, {"state": st.item(), "stage": sl.item(), "attack": at.item()}
+
+
+class TransformerWorldModel(WorldModel):
+    """Transformer encoder variant with the same forecasting interface."""
+
+    def __init__(self, input_size: int, num_stages: int, horizon: int, hidden_size: int = 128,
+             layers: int = 2, dropout: float = 0.2, heads: int = 4):
+        super().__init__(input_size, num_stages, horizon, hidden_size, layers, dropout, heads)
+        del self.lstm
+        self.encoder_stack = nn.TransformerEncoder(
+            nn.TransformerEncoderLayer(hidden_size, heads, hidden_size * 4, dropout,
+                                  batch_first=True, norm_first=True),
+            num_layers=layers,
+        )
+
+    def forward(self, x: torch.Tensor, need_attention: bool = False) -> dict[str, torch.Tensor]:
+        z = self.encoder_stack(self.encoder(x))
+        ctx = self.norm(z[:, -1])
+        B = x.shape[0]
+        out = {
+            "state": self.state_head(ctx).view(B, self.horizon, self.input_size),
+            "stage_logits": self.stage_head(ctx).view(B, self.horizon, self.num_stages),
+            "attack_logit": self.attack_head(ctx),
+        }
+        if need_attention:
+            # The encoder does not expose weights without a custom layer; retain the
+            # documented shape and provide a neutral attention map for explanations.
+            out["attention"] = torch.zeros(B, 1, x.shape[1], x.shape[1], device=x.device)
+        return out
+
+
+def build_model(kind: str, input_size: int, num_stages: int, horizon: int,
+                hp: dict) -> WorldModel:
+    cls = TransformerWorldModel if str(kind).lower() == "transformer" else WorldModel
+    return cls(input_size, num_stages, horizon, hidden_size=int(hp["hidden_size"]),
+               layers=int(hp["layers"]), dropout=float(hp["dropout"]),
+               heads=int(hp.get("attention_heads", hp.get("heads", 4))))

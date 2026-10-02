@@ -11,7 +11,7 @@ import torch
 
 from ..features.preprocess import Preprocessor, validate_features
 from .sequences import inference_ends
-from .world_model import WorldModel
+from .world_model import WorldModel, build_model
 
 ARTIFACTS = ("world_model.pt", "metadata.json")
 
@@ -41,8 +41,8 @@ class Forecaster:
         d = Path(models_dir)
         meta = json.loads((d / "metadata.json").read_text(encoding="utf-8"))
         hp = meta["model"]
-        model = WorldModel(len(meta["feature_names"]), len(meta["stage_names"]), int(meta["window"]["forecast_horizon"]),
-                           hidden_size=hp["hidden_size"], layers=hp["layers"], dropout=hp["dropout"], heads=hp["attention_heads"])
+        model = build_model(hp.get("type", "lstm"), len(meta["feature_names"]), len(meta["stage_names"]),
+                            int(meta["window"]["forecast_horizon"]), hp)
         model.load_state_dict(torch.load(d / "world_model.pt", map_location=device, weights_only=True))
         return cls(model, meta, device)
 

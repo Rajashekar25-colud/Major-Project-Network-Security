@@ -43,7 +43,7 @@ def render():
     c1, c2 = st.columns([5, 2])
     with c1:
         with st.container(border=True):
-            section("Forecast risk over time")
+            section("Infiltration probability over time (forecast)")
             rs = a.session
             rows = rs.ends
             show_truth = False

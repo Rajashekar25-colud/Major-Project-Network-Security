@@ -22,8 +22,9 @@ def _perf_tab(fc):
     f, o, lt = ev["forecast"], ev["onset"], ev["lead_time"]
     st.markdown("<div class='small'>Measured on traffic the model never saw during training.</div>", unsafe_allow_html=True)
     st.write("")
-    kpi_row([("Alert precision", f"{f['precision']:.0%}", "alerts that were real attacks"), ("Attacks caught", f"{f['recall']:.0%}", "recall over the forecast window"),
-             ("False-alarm rate", f"{f['false_positive_rate']:.1%}", "of normal windows"), ("F1 score", f"{f['f1']:.2f}", "balance of the two")])
+    kpi_row([("Accuracy", f"{f.get('accuracy', float('nan')):.1%}", "normal vs attack windows"), ("Alert precision", f"{f['precision']:.0%}", "alerts that were real attacks"),
+             ("Attacks caught", f"{f['recall']:.0%}", "recall over the forecast window"), ("False-alarm rate", f"{f['false_positive_rate']:.1%}", "of normal windows"),
+             ("F1 score", f"{f['f1']:.2f}", "balance of the two")])
     st.write("")
     fc_ = lt.get("forecastable_episodes") or 0
     early, late, miss = lt["warned_early"], lt["detected_late"], lt["missed"]
@@ -38,6 +39,10 @@ def _perf_tab(fc):
     fig.update_xaxes(title="How far ahead (seconds)", **GRID); fig.update_yaxes(range=[0, 1.02], tickformat=".0%", **GRID)
     fig.update_layout(**PLOT, height=280, title=dict(text="Forecast quality by lead time", font=dict(size=13)), legend=dict(orientation="h", y=1.15))
     st.plotly_chart(fig, width="stretch")
+    cmp_ = read_json(state.MODELS_DIR / "model_comparison.json")
+    if cmp_:
+        section("Model comparison (LSTM vs Transformer)")
+        st.dataframe(pd.DataFrame(cmp_["rows"]).round(3), hide_index=True, width="stretch")
     with st.expander("Technical details"):
         meta = fc.meta
         st.json({"trained_at": meta.get("trained_at"), "model": {k: meta["model"].get(k) for k in ("architecture", "parameters", "hidden_size", "layers", "dropout", "learning_rate")},

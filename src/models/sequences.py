@@ -32,6 +32,7 @@ def split_labels(states: pd.DataFrame, config: dict[str, Any]) -> np.ndarray:
             blk = np.arange(n) // B
             lab[idx] = np.array(pattern, dtype=object)[blk % len(pattern)]
         return lab
+
     tf = float(sp["train_fraction"]); vf = float(sp["val_fraction"])
     for idx in groups:
         n = len(idx)
@@ -40,6 +41,20 @@ def split_labels(states: pd.DataFrame, config: dict[str, Any]) -> np.ndarray:
         lab[idx[min(a + G, n):max(b, 0)]] = "val"
         lab[idx[min(b + G, n):]] = "test"
     return lab
+
+
+def holdout_blocks(states: pd.DataFrame, part: np.ndarray, label: str = "test",
+                   min_windows: int = 1) -> list[np.ndarray]:
+    """Return contiguous, segment-safe blocks belonging to one split label."""
+    if len(states) != len(part):
+        raise ValueError("states and split labels must have the same length")
+    mask = np.asarray(part) == label
+    if not mask.any():
+        return []
+    indices = np.flatnonzero(mask)
+    breaks = np.flatnonzero(np.diff(indices) != 1) + 1
+    groups = np.split(indices, breaks)
+    return [g for g in groups if len(g) >= min_windows]
 
 
 def sample_ends(states: pd.DataFrame, L: int, H: int, part: np.ndarray | None = None,
@@ -89,11 +104,3 @@ def future_targets(sid: np.ndarray, is_attack: np.ndarray, ends: np.ndarray, H: 
     off = np.arange(1, H + 1)
     idx = ends[:, None] + off[None, :]
     return sid[idx], is_attack[idx].astype(np.float32)
-
-
-def holdout_blocks(states: pd.DataFrame, part: np.ndarray, label: str = "test", min_len: int = 0) -> list[np.ndarray]:
-    """Row-index arrays of contiguous runs of one split label that lie inside a single segment."""
-    m = part == label
-    key = states["segment"].to_numpy() * 10 + m.astype(int)
-    run_id = np.cumsum(np.concatenate([[1], key[1:] != key[:-1]]))
-    return [idx for rid in np.unique(run_id[m]) if len(idx := np.flatnonzero((run_id == rid) & m)) >= min_len]

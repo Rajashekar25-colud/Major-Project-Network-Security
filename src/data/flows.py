@@ -18,6 +18,17 @@ import pandas as pd
 from .schema import BENIGN, LabelMapper, check_required, resolve_columns
 
 PROTO_NAMES = {"tcp": 6, "udp": 17, "icmp": 1, "icmpv6": 58, "sctp": 132, "gre": 47}
+# Standard UNSW-NB15 column order, used for the dataset's headerless raw files.
+UNSW_COLUMNS = [
+    "srcip", "sport", "dstip", "dsport", "proto", "state", "dur", "sbytes", "dbytes",
+    "sttl", "dttl", "sloss", "dloss", "service", "Sload", "Dload", "Spkts", "Dpkts",
+    "swin", "dwin", "stcpb", "dtcpb", " smeansz", "dmeansz", "trans_depth",
+    "res_bdy_len", "Sjit", "Djit", "Stime", "Ltime", "Sintpkt", "Dintpkt",
+    "tcprtt", "synack", "ackdat", "is_sm_ips_ports", "ct_state_ttl", "ct_flw_http_mthd",
+    "is_ftp_login", "ct_ftp_cmd", "ct_srv_src", "ct_srv_dst", "ct_dst_ltm",
+    "ct_src_ltm", "ct_src_dport_ltm", "ct_dst_sport_ltm", "ct_dst_src_ltm",
+    "attack_cat", "Label",
+]
 _TS_FORMATS = [
     "%d/%m/%Y %H:%M:%S",      # CSE-CIC-IDS2018 (day first)
     "%Y-%m-%d %H:%M:%S",
@@ -80,8 +91,8 @@ def canonicalize_chunk(raw: pd.DataFrame, colmap: dict[str, str], config: dict[s
     proto = raw[colmap["protocol"]]
     pnum = pd.to_numeric(proto, errors="coerce")
     if pnum.isna().mean() > 0.5:      # textual protocols (tcp/udp/icmp)
-        pnum = proto.astype(str).str.strip().str.lower().map(PROTO_NAMES)
-    out["protocol"] = pnum.astype("float64")
+        pnum = proto.astype(str).str.strip().str.lower().map(PROTO_NAMES).fillna(0)
+    out["protocol"] = pnum.astype("float64").fillna(0)
 
     def col(name, default=0.0):
         return _num(raw, colmap.get(name), n, default)
@@ -132,13 +143,24 @@ def iter_flow_chunks(path: str | Path, config: dict[str, Any], mapper: LabelMapp
     """Yield canonical flow chunks from a CSV without loading it whole."""
     path = Path(path)
     header = pd.read_csv(path, nrows=0).columns.tolist()
+    headerless = len(header) == len(UNSW_COLUMNS) and not resolve_columns(header, config).get("timestamp")
+    if headerless:
+        header = UNSW_COLUMNS
     colmap = resolve_columns(header, config)
+    if "attack_cat" in header:
+        colmap["label"] = "attack_cat"
+    if any(n in colmap for n in ("timestamp", "dst_port")) and (
+        colmap.get("timestamp") == "Stime" or colmap.get("dst_port") == "dsport"
+    ):
+        config = {**config, "units": {**config["units"], "duration_divisor": 1.0, "iat_divisor": 1000.0}}
     check_required(colmap, path.name)
     mapper = mapper or LabelMapper(config)
     ts_parser = TimestampParser(config.get("timestamp_format"))
     usecols = list(dict.fromkeys(colmap.values()))
     total = 0
-    reader = pd.read_csv(path, usecols=usecols, chunksize=chunksize, low_memory=False,
+    reader = pd.read_csv(path, names=UNSW_COLUMNS if headerless else None,
+                         header=None if headerless else "infer", usecols=usecols, chunksize=chunksize,
+                         low_memory=False,
                          on_bad_lines="skip", encoding_errors="replace")
     for raw in reader:
         total += len(raw)

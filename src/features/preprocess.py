@@ -55,6 +55,13 @@ class Preprocessor:
             raise ValueError(f"Input is missing {len(missing)} model feature(s): {missing[:8]}")
         return self.transform_array(df[self.names].to_numpy(dtype=np.float64))
 
+    def inverse_array(self, X: np.ndarray) -> np.ndarray:
+        """Convert model-space features back to raw feature units."""
+        Z = np.asarray(X, dtype=np.float64) * self.std + self.mean
+        if self.log_mask.any():
+            Z[:, self.log_mask] = np.sign(Z[:, self.log_mask]) * np.expm1(np.abs(Z[:, self.log_mask]))
+        return Z
+
     def to_dict(self) -> dict[str, Any]:
         return {"names": self.names, "clip": self.clip, "mean": self.mean.tolist(), "std": self.std.tolist(),
                 "active": self.active.tolist(), "log_features": [n for n, m in zip(self.names, self.log_mask) if m]}

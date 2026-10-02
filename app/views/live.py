@@ -11,6 +11,7 @@ from charts import gauge, horizon_bars, risk_timeline, tactic_probs
 from src.explain.explainer import explain_window
 from src.product.config import SEV_COLOR, SEVERITY_LABEL
 from src.product.knowledge import driver_sentences, feature_label, playbook
+from panels import flagged_traffic
 from ui import banner, fmt_secs, kpi_row, page_header, section
 
 
@@ -111,5 +112,11 @@ def render():
                     st.markdown(f"<div class='act'>{x}</div>", unsafe_allow_html=True)
             else:
                 st.markdown("<div class='small'>No action needed. The system keeps scoring each new window.</div>", unsafe_allow_html=True)
+
+        with st.container(border=True):
+            section("Flagged traffic patterns")
+            hh = ls.history().tail(300)
+            sel = hh[hh["risk"] >= thr * 0.7]
+            flagged_traffic(a.states, sel["row"].to_numpy(), sel["risk"].to_numpy(), 8)
 
     st.fragment(run_every=0.6 if ss["playing"] else None)(view)()

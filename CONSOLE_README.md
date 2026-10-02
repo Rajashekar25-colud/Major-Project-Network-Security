@@ -16,3 +16,9 @@ python -m streamlit run app/console.py
 Rename the product, add an organisation name or switch on password protection in `configs/product.yaml`.
 Incidents, notes and the audit trail are stored locally in `data/app.db`; settings in `data/settings.json`.
 Nothing leaves the machine.
+
+## Additional pages and scripts (compliance update)
+* **Defence Simulation** - counterfactual roll-outs: no action vs rate-limit vs isolate host (assumption-based what-if).
+* `scripts/compare_models.py` (LSTM vs Transformer), `scripts/cross_dataset_eval.py` (e.g. UNSW-NB15), `scripts/benchmark.py` (throughput).
+* `model.type` in `configs/config.yaml` switches the architecture; retrain after changing it.
+* See `REQUIREMENTS_TRACEABILITY.md` for the line-by-line mapping to the PPT and synopsis.

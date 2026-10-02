@@ -10,7 +10,7 @@ import streamlit as st
 
 import state
 import ui
-from views import analyze, incidents, live, model, overview, settings
+from views import analyze, incidents, live, model, overview, settings, simulate
 
 ui.inject_css()
 if os.environ.get("INC_SELECT"):            # AppTest cannot click table rows: emulate selecting the first row
@@ -21,4 +21,4 @@ if os.environ.get("INC_SELECT"):            # AppTest cannot click table rows: e
 srcs = state.sources()
 if st.session_state.get("source_label") not in srcs:
     st.session_state["source_label"] = os.environ.get("SOURCE") or state.default_source(srcs)
-{"overview": overview, "live": live, "incidents": incidents, "analyze": analyze, "model": model, "settings": settings}[os.environ["PAGE"]].render()
+{"overview": overview, "live": live, "incidents": incidents, "analyze": analyze, "model": model, "settings": settings, "simulate": simulate}[os.environ["PAGE"]].render()

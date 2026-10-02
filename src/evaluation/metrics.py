@@ -16,7 +16,7 @@ def binary_metrics(y_true, y_prob, thr: float) -> dict[str, Any]:
     pred = (p >= thr).astype(int)
     pr, rc, f1, _ = precision_recall_fscore_support(y, pred, average="binary", zero_division=0)
     tn, fp, fn, tp = confusion_matrix(y, pred, labels=[0, 1]).ravel()
-    out = {"precision": float(pr), "recall": float(rc), "f1": float(f1),
+    out = {"accuracy": float((y == pred).mean()), "precision": float(pr), "recall": float(rc), "f1": float(f1),
            "false_positive_rate": float(fp / max(fp + tn, 1)), "tp": int(tp), "fp": int(fp), "tn": int(tn), "fn": int(fn),
            "support_positive": int(y.sum()), "support_total": int(len(y)), "threshold": float(thr)}
     if 0 < y.sum() < len(y):

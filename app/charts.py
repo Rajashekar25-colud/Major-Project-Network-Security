@@ -33,7 +33,7 @@ def risk_timeline(ts: pd.Series, risk: np.ndarray, seg: np.ndarray, thr: float, 
         for a, b in list(zip(s_, e_))[:250]:
             fig.add_vrect(x0=ts.iloc[a], x1=ts.iloc[min(b, len(ts) - 1)], fillcolor="rgba(239,68,68,0.13)", line_width=0, layer="below")
     x, v = _gapped(ts, risk, seg)
-    fig.add_trace(go.Scatter(x=x, y=v, mode="lines", name="Forecast risk", line=dict(color="#2dd4bf", width=2), connectgaps=False,
+    fig.add_trace(go.Scatter(x=x, y=v, mode="lines", name="Infiltration probability", line=dict(color="#2dd4bf", width=2), connectgaps=False,
                              fill="tozeroy", fillcolor="rgba(45,212,191,0.10)", hovertemplate="%{x|%d %b %H:%M:%S}<br>risk %{y:.0%}<extra></extra>"))
     fig.add_hline(y=thr, line=dict(color="#f97316", dash="dash", width=1.2), annotation_text=f"alert threshold {thr:.0%}",
                   annotation_position="top left", annotation_font_color="#f97316")
