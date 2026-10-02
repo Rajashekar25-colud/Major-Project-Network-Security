@@ -1,0 +1,18 @@
+[
+  {
+    "id": "v000_original",
+    "created": "2026-10-01T10:27:22",
+    "status": "active",
+    "parent": null,
+    "note": "Original trained model",
+    "stages": [
+      "Benign",
+      "Initial Access",
+      "Credential Access",
+      "Lateral Movement",
+      "Command and Control",
+      "Impact"
+    ],
+    "threshold": 0.92
+  }
+]

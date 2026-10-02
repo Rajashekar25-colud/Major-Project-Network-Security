@@ -1,0 +1,16 @@
+# Product / white-label settings. Rename the product here; nothing else needs changing.
+branding:
+  product_name: "Aegis Forecast"
+  tagline: "Predictive network threat detection"
+  accent: "#2dd4bf"
+  organisation: ""            # optional: shown in the sidebar and in exported reports
+auth:
+  enabled: false              # set true and put a SHA-256 hash in password_sha256 to require a password
+  password_sha256: ""         # python -c "import hashlib;print(hashlib.sha256(b'yourpassword').hexdigest())"
+defaults:
+  sensitivity: balanced       # low_noise | balanced | early_warning
+learning:
+  min_windows: 600            # minimum labelled windows required to fine-tune (about 100 minutes)
+  epochs: 6
+  learning_rate: 0.0002
+  anchor_strength: 0.001      # pulls weights toward the current model (limits forgetting)
