@@ -1,0 +1,88 @@
+erDiagram
+  USER ||--o{ ANALYSIS : "owns (owner)"
+  USER ||--o{ AUDIT_EVENT : "performs (actor)"
+  ANALYSIS ||--|{ NETWORK_STATE_WINDOW : "contains"
+  MODEL_METADATA ||--o{ ANALYSIS : "verified by"
+  MODEL_METADATA ||--|| EVALUATION_REPORT : "evaluated in"
+  MODEL_METADATA ||--o{ MODEL_VERSION : "versioned as"
+
+  USER {
+    string username PK "data/users.json"
+    string password_hash "PBKDF2-SHA256, salted"
+    string role "admin | user"
+    string full_name
+    string email
+    string organisation
+    bool active
+    bool must_change
+    datetime created
+    datetime last_login
+    int failed
+    datetime locked_until
+  }
+  AUDIT_EVENT {
+    datetime ts "data/audit.jsonl"
+    string actor FK
+    string action
+    string detail
+  }
+  ANALYSIS {
+    string id PK "data/history/id.json"
+    string owner FK "username, null for older records"
+    string filename
+    datetime created
+    string kind "flow-csv | pcap | state-table"
+    int records
+    int windows
+    int forecast_windows
+    int alerts
+    bool labelled
+    float threshold
+    float peak_risk
+    string state "NORMAL | WATCH | WARNING | HIGH RISK"
+    datetime start
+    datetime end
+    string model_fingerprint FK
+  }
+  NETWORK_STATE_WINDOW {
+    string analysis_id FK "data/history/id.states.csv.gz"
+    datetime timestamp "10 s window start"
+    float flow_count
+    float packets_total
+    float bytes_total
+    float protocol_tcp
+    float dst_port_shares
+    float scan_score
+    int segment
+    bool filled
+    bool is_attack "only if labelled"
+    string stage "only if labelled"
+  }
+  MODEL_METADATA {
+    string fingerprint PK "computed SHA-256, not stored in the file"
+    string project_version "models/metadata.json"
+    datetime trained_at
+    int n_features
+    int sequence_length
+    int forecast_horizon
+    float warning_threshold
+    json attack_tactics "stage to tactic id"
+    json dataset
+  }
+  EVALUATION_REPORT {
+    string split "models/evaluation.json"
+    int n_samples
+    float threshold
+    json forecast
+    json onset
+    json lead_time
+    json per_horizon
+    json baselines
+  }
+  MODEL_VERSION {
+    string id PK "models/versions/index.json"
+    string status
+    string parent
+    datetime created
+    float threshold
+  }

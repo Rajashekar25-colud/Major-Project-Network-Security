@@ -1,0 +1,47 @@
+digraph UC {
+  graph [rankdir=LR, fontname="Helvetica", nodesep=0.28, ranksep=1.6, pad=0.3, bgcolor="white", splines=true, newrank=true];
+  node  [fontname="Helvetica", fontsize=11];
+  edge  [fontname="Helvetica", fontsize=9, color="#4a4946", arrowsize=0.7];
+
+  node [shape=none, margin=0, fontsize=12, fontcolor="#1f1e1d"];
+  AN  [label=<<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="2"><TR><TD><IMG SRC="actor.png"/></TD></TR><TR><TD><B>SOC Analyst /<BR/>Security Operator</B></TD></TR></TABLE>>];
+  AD  [label=<<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="2"><TR><TD><IMG SRC="actor.png"/></TD></TR><TR><TD><B>System<BR/>Administrator</B></TD></TR></TABLE>>];
+  SRC [label=<<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="2"><TR><TD><IMG SRC="actor.png"/></TD></TR><TR><TD><B>Network Traffic<BR/>Source</B></TD></TR></TABLE>>];
+  ML  [label=<<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="2"><TR><TD><IMG SRC="actor.png"/></TD></TR><TR><TD><B>ML Forecasting<BR/>System</B></TD></TR></TABLE>>];
+  {rank=source; AN; AD}
+  {rank=sink; SRC; ML}
+
+  subgraph cluster_sys { label="AI-Based Network Attack Forecasting System"; labeljust=c; fontsize=14; style="rounded"; color="#4a7fb5"; penwidth=1.6; bgcolor="#fafcfe";
+    node [shape=ellipse, style=filled, fontsize=11, margin="0.12,0.06"];
+    LOGIN [label="Login", fillcolor="#f6e9e3", color="#c96442"];
+    NEW [label="Start New Analysis", fillcolor="#f6e9e3", color="#c96442"];
+    UP [label="Upload Network Traffic", fillcolor="#f6e9e3", color="#c96442"];
+    VAL [label="Validate Traffic", fillcolor="#f6e9e3", color="#c96442"];
+    PROC [label="Process Traffic", fillcolor="#ebe3f5", color="#7a5fb0"];
+    FEAT [label="Extract Features", fillcolor="#ebe3f5", color="#7a5fb0"];
+    STATE [label="Generate Network State", fillcolor="#ebe3f5", color="#7a5fb0"];
+    FC [label="Forecast Future\nAttack Risk", fillcolor="#ebe3f5", color="#7a5fb0"];
+    VF [label="View Forecast", fillcolor="#f6e9e3", color="#c96442"];
+    VA [label="View Alerts", fillcolor="#f6e9e3", color="#c96442"];
+    VS [label="View Attack Stage", fillcolor="#f6e9e3", color="#c96442"];
+    VM [label="View MITRE ATT&CK\nMapping", fillcolor="#f6e9e3", color="#c96442"];
+    VE [label="View Explanation", fillcolor="#f6e9e3", color="#c96442"];
+    VT [label="View Traffic", fillcolor="#f6e9e3", color="#c96442"];
+    VFV [label="Validate Forecast", fillcolor="#f6e9e3", color="#c96442"];
+    VH [label="View Analysis History", fillcolor="#f6e9e3", color="#c96442"];
+    VEV [label="View Evaluation", fillcolor="#e1ecf6", color="#4a7fb5"];
+    VMH [label="View Model Health", fillcolor="#e1ecf6", color="#4a7fb5"];
+    CFG [label="Configure Settings\n(alert threshold)", fillcolor="#e1ecf6", color="#4a7fb5"];
+    UM [label="Manage Users", fillcolor="#e1ecf6", color="#4a7fb5"];
+  }
+
+  edge [dir=none];
+  AN -> LOGIN; AN -> NEW; AN -> VF; AN -> VA; AN -> VS; AN -> VM; AN -> VE; AN -> VT; AN -> VFV; AN -> VH;
+  AD -> LOGIN; AD -> VEV; AD -> VMH; AD -> CFG; AD -> UM; AD -> VH;
+  UP -> SRC; FC -> ML;
+
+  edge [dir=forward, style=dashed, color="#6b6a68", fontcolor="#1f1e1d", arrowhead=vee];
+  NEW -> UP [label="«include»"]; NEW -> VAL [label="«include»"]; NEW -> PROC [label="«include»"];
+  PROC -> FEAT [label="«include»"]; PROC -> STATE [label="«include»"]; PROC -> FC [label="«include»"];
+  VS -> VF [label="«extend»"]; VM -> VS [label="«extend»"]; VE -> VF [label="«extend»"]; VA -> VF [label="«extend»"]; VFV -> VF [label="«extend»"];
+}

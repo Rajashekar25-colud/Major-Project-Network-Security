@@ -1,0 +1,28 @@
+digraph ACT {
+  graph [rankdir=TB, fontname="Helvetica", nodesep=0.5, ranksep=0.42, pad=0.3, bgcolor="white", splines=true];
+  node  [fontname="Helvetica", fontsize=12, shape=box, style="rounded,filled", fillcolor="#f6e9e3", color="#c96442", margin="0.2,0.10"];
+  edge  [fontname="Helvetica", fontsize=11, color="#1f1e1d", arrowsize=0.8];
+
+  S  [shape=circle, label="", style=filled, fillcolor="#1f1e1d", width=0.28, fixedsize=true];
+  E1 [shape=doublecircle, label="", style=filled, fillcolor="#1f1e1d", width=0.26, fixedsize=true];
+  E2 [shape=doublecircle, label="", style=filled, fillcolor="#1f1e1d", width=0.26, fixedsize=true];
+  node [shape=diamond, style=filled, fillcolor="#fdf3d8", color="#b7791f", margin="0.05,0.03"];
+  V  [label="Valid?"]; TH [label="Risk above\nthreshold?"]; PS [label="Persistence met,\nnot in cooldown?"];
+  node [shape=box, style="rounded,filled", fillcolor="#f6e9e3", color="#c96442", margin="0.2,0.10"];
+  LG [label="Sign in"]; UP [label="Upload network traffic\n(CSV / PCAP / PCAPNG)"];
+  VF [label="Validate file\nformat · timestamps · fields · model features · history length"];
+  ER [label="Show error and reason", fillcolor="#fbe4e1", color="#c0392b"];
+  FE [label="Extract features"]; TW [label="Build time windows\n(network state per 10 s)"];
+  FC [label="Generate multi-step forecast\n(LSTM + temporal attention)"]; RK [label="Calculate risk\n(peak forecast probability)"];
+  AL [label="Generate alert\n(update the open alert if one exists)"]; MS [label="Map attack stage\nto MITRE ATT&CK tactic"];
+  ST [label="Store analysis\n(history record + windows)"]; UD [label="Update dashboard"];
+  EX [label="Generate explanation on demand\n(attention · gradient x input · SHAP)"];
+
+  S -> LG -> UP -> VF -> V;
+  V -> ER [label=" NO"]; ER -> E1;
+  V -> FE [label=" YES"]; FE -> TW -> FC -> RK -> TH;
+  TH -> PS [label=" YES"]; TH -> MS [label=" NO"];
+  PS -> AL [label=" YES"]; PS -> MS [label=" NO"];
+  AL -> MS; MS -> ST -> UD -> EX -> E2;
+  {rank=same; V; ER} {rank=same; TH; PS}
+}

@@ -1,0 +1,929 @@
+{
+  "split": "test",
+  "n_samples": 4073,
+  "threshold": 0.92,
+  "evaluated_at": "2026-10-01T10:27:22",
+  "forecast": {
+    "precision": 0.964022894521668,
+    "recall": 0.8511406295119839,
+    "f1": 0.904071773636991,
+    "false_positive_rate": 0.01256281407035176,
+    "tp": 5895,
+    "fp": 220,
+    "tn": 17292,
+    "fn": 1031,
+    "support_positive": 6926,
+    "support_total": 24438,
+    "threshold": 0.92,
+    "roc_auc": 0.9866403436142201,
+    "pr_auc": 0.9713934847755378,
+    "brier": 0.04329803874017224
+  },
+  "per_horizon": [
+    {
+      "horizon": 1,
+      "seconds_ahead": 10,
+      "precision": 0.9794238683127572,
+      "recall": 0.8221070811744386,
+      "f1": 0.8938967136150234,
+      "false_positive_rate": 0.00686106346483705,
+      "tp": 952,
+      "fp": 20,
+      "tn": 2895,
+      "fn": 206,
+      "support_positive": 1158,
+      "support_total": 4073,
+      "threshold": 0.92,
+      "roc_auc": 0.9867020977197926,
+      "pr_auc": 0.9752274548747258,
+      "brier": 0.042500761723143064
+    },
+    {
+      "horizon": 2,
+      "seconds_ahead": 20,
+      "precision": 0.9601167315175098,
+      "recall": 0.8545454545454545,
+      "f1": 0.9042601923957856,
+      "false_positive_rate": 0.01405071967100754,
+      "tp": 987,
+      "fp": 41,
+      "tn": 2877,
+      "fn": 168,
+      "support_positive": 1155,
+      "support_total": 4073,
+      "threshold": 0.92,
+      "roc_auc": 0.9878277536947859,
+      "pr_auc": 0.9739367797030982,
+      "brier": 0.04284068208476
+    },
+    {
+      "horizon": 3,
+      "seconds_ahead": 30,
+      "precision": 0.9584139264990329,
+      "recall": 0.858008658008658,
+      "f1": 0.9054362722704431,
+      "false_positive_rate": 0.014736120630568882,
+      "tp": 991,
+      "fp": 43,
+      "tn": 2875,
+      "fn": 164,
+      "support_positive": 1155,
+      "support_total": 4073,
+      "threshold": 0.92,
+      "roc_auc": 0.9871453198389456,
+      "pr_auc": 0.9738932953235866,
+      "brier": 0.043353964990885535
+    },
+    {
+      "horizon": 4,
+      "seconds_ahead": 40,
+      "precision": 0.9565637065637066,
+      "recall": 0.8594969644405898,
+      "f1": 0.9054362722704431,
+      "false_positive_rate": 0.015410958904109588,
+      "tp": 991,
+      "fp": 45,
+      "tn": 2875,
+      "fn": 162,
+      "support_positive": 1153,
+      "support_total": 4073,
+      "threshold": 0.92,
+      "roc_auc": 0.9871538214782163,
+      "pr_auc": 0.9679194050168669,
+      "brier": 0.0440263933271085
+    },
+    {
+      "horizon": 5,
+      "seconds_ahead": 50,
+      "precision": 0.9610516066212269,
+      "recall": 0.8560277536860365,
+      "f1": 0.9055045871559633,
+      "false_positive_rate": 0.0136986301369863,
+      "tp": 987,
+      "fp": 40,
+      "tn": 2880,
+      "fn": 166,
+      "support_positive": 1153,
+      "support_total": 4073,
+      "threshold": 0.92,
+      "roc_auc": 0.98665037008875,
+      "pr_auc": 0.9651091767616907,
+      "brier": 0.0439604565704077
+    },
+    {
+      "horizon": 6,
+      "seconds_ahead": 60,
+      "precision": 0.9695481335952849,
+      "recall": 0.8567708333333334,
+      "f1": 0.9096774193548387,
+      "false_positive_rate": 0.010612803834303321,
+      "tp": 987,
+      "fp": 31,
+      "tn": 2890,
+      "fn": 165,
+      "support_positive": 1152,
+      "support_total": 4073,
+      "threshold": 0.92,
+      "roc_auc": 0.985960442105063,
+      "pr_auc": 0.9717436933580189,
+      "brier": 0.04310597374472864
+    }
+  ],
+  "onset": {
+    "precision": 0.7777777777777778,
+    "recall": 0.24305555555555555,
+    "f1": 0.37037037037037035,
+    "false_positive_rate": 0.003608805485384338,
+    "tp": 35,
+    "fp": 10,
+    "tn": 2761,
+    "fn": 109,
+    "support_positive": 144,
+    "support_total": 2915,
+    "threshold": 0.92,
+    "roc_auc": 0.7506866754881912,
+    "pr_auc": 0.25267196415093124,
+    "brier": 0.0704236046375454,
+    "definition": "Samples whose current window is benign; positive = an attack starts within the next 6 windows. This isolates true early warning from 'the attack is already happening'."
+  },
+  "stage": {
+    "accuracy": 0.9488092315246747,
+    "balanced_accuracy": 0.7411077630938364,
+    "macro_precision": 0.7965748789492776,
+    "macro_recall": 0.7411077630938364,
+    "macro_f1": 0.7605135407423688,
+    "per_class": {
+      "Benign": {
+        "precision": 0.9437319216285542,
+        "recall": 0.9874371859296482,
+        "f1": 0.9650899958141482,
+        "support": 17512
+      },
+      "Initial Access": {
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0,
+        "support": 1
+      },
+      "Credential Access": {
+        "precision": 1.0,
+        "recall": 0.933404368673415,
+        "f1": 0.9655552493799945,
+        "support": 1877
+      },
+      "Lateral Movement": {
+        "precision": 0.9385665529010239,
+        "recall": 0.5623721881390593,
+        "f1": 0.7033248081841432,
+        "support": 1956
+      },
+      "Command and Control": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0,
+        "support": 1752
+      },
+      "Impact": {
+        "precision": 0.8971507991660875,
+        "recall": 0.9634328358208956,
+        "f1": 0.9291111910759265,
+        "support": 1340
+      }
+    },
+    "classes_with_support": [
+      "Benign",
+      "Initial Access",
+      "Credential Access",
+      "Lateral Movement",
+      "Command and Control",
+      "Impact"
+    ],
+    "classes_without_support": [],
+    "support": {
+      "Benign": 17512,
+      "Initial Access": 1,
+      "Credential Access": 1877,
+      "Lateral Movement": 1956,
+      "Command and Control": 1752,
+      "Impact": 1340
+    },
+    "unseen_stage_samples": 0,
+    "confusion_matrix": {
+      "labels": [
+        "Benign",
+        "Initial Access",
+        "Credential Access",
+        "Lateral Movement",
+        "Command and Control",
+        "Impact"
+      ],
+      "matrix": [
+        [
+          17292,
+          0,
+          0,
+          72,
+          0,
+          148
+        ],
+        [
+          1,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        [
+          125,
+          0,
+          1752,
+          0,
+          0,
+          0
+        ],
+        [
+          856,
+          0,
+          0,
+          1100,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          0,
+          0,
+          1752,
+          0
+        ],
+        [
+          49,
+          0,
+          0,
+          0,
+          0,
+          1291
+        ]
+      ]
+    },
+    "note": "Accuracy/macro metrics use only classes present in the hold-out; classes without support are not scored.",
+    "accuracy_given_attack": 0.8511406295119839
+  },
+  "state_forecast": {
+    "mae": 0.4400848150253296,
+    "rmse": 0.8208572864532471,
+    "persistence_mae": 0.41009843349456787,
+    "persistence_rmse": 0.8454409837722778,
+    "mae_per_horizon": [
+      0.436362624168396,
+      0.4406847655773163,
+      0.43757668137550354,
+      0.44190022349357605,
+      0.44089803099632263,
+      0.44308653473854065
+    ],
+    "space": "standardised active features"
+  },
+  "lead_time": {
+    "available": true,
+    "attack_episodes": 51,
+    "forecastable_episodes": 47,
+    "not_forecastable_episodes": 4,
+    "warned_early": 0,
+    "detected_late": 6,
+    "missed": 41,
+    "warning_coverage": 0.0,
+    "detection_coverage_any": 0.1276595744680851,
+    "mean_lead_seconds": null,
+    "median_lead_seconds": null,
+    "min_lead_seconds": null,
+    "max_lead_seconds": null,
+    "total_alerts": 11,
+    "false_alerts": 1,
+    "false_alerts_per_hour": 0.08838693837466241,
+    "lookback_windows": 6,
+    "episodes": [
+      {
+        "start": 630,
+        "end": 719,
+        "status": "not_forecastable"
+      },
+      {
+        "start": 810,
+        "end": 899,
+        "status": "missed"
+      },
+      {
+        "start": 2430,
+        "end": 2519,
+        "status": "detected_late",
+        "delay_seconds": 120.0
+      },
+      {
+        "start": 2610,
+        "end": 2699,
+        "status": "missed"
+      },
+      {
+        "start": 6929,
+        "end": 6963,
+        "status": "not_forecastable"
+      },
+      {
+        "start": 6999,
+        "end": 7028,
+        "status": "missed"
+      },
+      {
+        "start": 10367,
+        "end": 10456,
+        "status": "detected_late",
+        "delay_seconds": 120.0
+      },
+      {
+        "start": 10547,
+        "end": 10636,
+        "status": "missed"
+      },
+      {
+        "start": 12167,
+        "end": 12171,
+        "status": "missed"
+      },
+      {
+        "start": 12176,
+        "end": 12183,
+        "status": "detected_late",
+        "delay_seconds": 30.0
+      },
+      {
+        "start": 12188,
+        "end": 12195,
+        "status": "missed"
+      },
+      {
+        "start": 12200,
+        "end": 12207,
+        "status": "missed"
+      },
+      {
+        "start": 12212,
+        "end": 12219,
+        "status": "missed"
+      },
+      {
+        "start": 12224,
+        "end": 12231,
+        "status": "missed"
+      },
+      {
+        "start": 12236,
+        "end": 12244,
+        "status": "missed"
+      },
+      {
+        "start": 12248,
+        "end": 12256,
+        "status": "missed"
+      },
+      {
+        "start": 14754,
+        "end": 14754,
+        "status": "missed"
+      },
+      {
+        "start": 14771,
+        "end": 14771,
+        "status": "missed"
+      },
+      {
+        "start": 14783,
+        "end": 14783,
+        "status": "missed"
+      },
+      {
+        "start": 14794,
+        "end": 14794,
+        "status": "missed"
+      },
+      {
+        "start": 14806,
+        "end": 14806,
+        "status": "missed"
+      },
+      {
+        "start": 14817,
+        "end": 14817,
+        "status": "missed"
+      },
+      {
+        "start": 14823,
+        "end": 14823,
+        "status": "missed"
+      },
+      {
+        "start": 14829,
+        "end": 14829,
+        "status": "missed"
+      },
+      {
+        "start": 14835,
+        "end": 14835,
+        "status": "missed"
+      },
+      {
+        "start": 14946,
+        "end": 14946,
+        "status": "missed"
+      },
+      {
+        "start": 14957,
+        "end": 14957,
+        "status": "missed"
+      },
+      {
+        "start": 14986,
+        "end": 14986,
+        "status": "missed"
+      },
+      {
+        "start": 15010,
+        "end": 15010,
+        "status": "missed"
+      },
+      {
+        "start": 15015,
+        "end": 15015,
+        "status": "missed"
+      },
+      {
+        "start": 16430,
+        "end": 16431,
+        "status": "missed"
+      },
+      {
+        "start": 16436,
+        "end": 16436,
+        "status": "missed"
+      },
+      {
+        "start": 18044,
+        "end": 18044,
+        "status": "missed"
+      },
+      {
+        "start": 18050,
+        "end": 18050,
+        "status": "missed"
+      },
+      {
+        "start": 18061,
+        "end": 18061,
+        "status": "missed"
+      },
+      {
+        "start": 18090,
+        "end": 18090,
+        "status": "missed"
+      },
+      {
+        "start": 18102,
+        "end": 18107,
+        "status": "missed"
+      },
+      {
+        "start": 18113,
+        "end": 18113,
+        "status": "missed"
+      },
+      {
+        "start": 18125,
+        "end": 18125,
+        "status": "missed"
+      },
+      {
+        "start": 18130,
+        "end": 18130,
+        "status": "missed"
+      },
+      {
+        "start": 18234,
+        "end": 18234,
+        "status": "missed"
+      },
+      {
+        "start": 18246,
+        "end": 18246,
+        "status": "missed"
+      },
+      {
+        "start": 21580,
+        "end": 21648,
+        "status": "missed"
+      },
+      {
+        "start": 22990,
+        "end": 23079,
+        "status": "not_forecastable"
+      },
+      {
+        "start": 23170,
+        "end": 23259,
+        "status": "detected_late",
+        "delay_seconds": 650.0
+      },
+      {
+        "start": 24790,
+        "end": 24879,
+        "status": "detected_late",
+        "delay_seconds": 120.0
+      },
+      {
+        "start": 24970,
+        "end": 25024,
+        "status": "missed"
+      },
+      {
+        "start": 26405,
+        "end": 26494,
+        "status": "not_forecastable"
+      },
+      {
+        "start": 26585,
+        "end": 26674,
+        "status": "missed"
+      },
+      {
+        "start": 28205,
+        "end": 28294,
+        "status": "detected_late",
+        "delay_seconds": 120.0
+      },
+      {
+        "start": 28385,
+        "end": 28474,
+        "status": "missed"
+      }
+    ],
+    "definition": "Lead time = episode start - alert opening time for alerts opened <= lookback windows before onset."
+  },
+  "baselines": {
+    "persistence_oracle": {
+      "forecast": {
+        "precision": 0.9599884858952217,
+        "recall": 0.9630378284724228,
+        "f1": 0.9615107395127577,
+        "false_positive_rate": 0.01587482868889904,
+        "tp": 6670,
+        "fp": 278,
+        "tn": 17234,
+        "fn": 256,
+        "support_positive": 6926,
+        "support_total": 24438,
+        "threshold": 0.5,
+        "roc_auc": 0.9735814998917619,
+        "pr_auc": 0.934980715807616,
+        "brier": 0.021851215320402653
+      },
+      "onset": {
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0,
+        "false_positive_rate": 0.0,
+        "tp": 0,
+        "fp": 0,
+        "tn": 2771,
+        "fn": 144,
+        "support_positive": 144,
+        "support_total": 2915,
+        "threshold": 0.5,
+        "roc_auc": 0.5,
+        "pr_auc": 0.049399656946826756,
+        "brier": 0.049399656946826756
+      },
+      "note": "Uses the true current label; it can never warn before onset (onset recall is 0 by construction)."
+    },
+    "logistic_sequence": {
+      "forecast": {
+        "precision": 0.9965690759377859,
+        "recall": 0.6290788333814612,
+        "f1": 0.7712869534430873,
+        "false_positive_rate": 0.0008565555047967108,
+        "tp": 4357,
+        "fp": 15,
+        "tn": 17497,
+        "fn": 2569,
+        "support_positive": 6926,
+        "support_total": 24438,
+        "threshold": 0.9899,
+        "roc_auc": 0.9847599326140057,
+        "pr_auc": 0.9715338251166837,
+        "brier": 0.04408594191800598
+      },
+      "onset": {
+        "precision": 1.0,
+        "recall": 0.1736111111111111,
+        "f1": 0.2958579881656805,
+        "false_positive_rate": 0.0,
+        "tp": 25,
+        "fp": 0,
+        "tn": 2771,
+        "fn": 119,
+        "support_positive": 144,
+        "support_total": 2915,
+        "threshold": 0.9899,
+        "roc_auc": 0.7033336340671237,
+        "pr_auc": 0.30222608644805316,
+        "brier": 0.08176620147169586
+      },
+      "threshold": 0.9899,
+      "lead_time": {
+        "available": true,
+        "attack_episodes": 51,
+        "forecastable_episodes": 47,
+        "not_forecastable_episodes": 4,
+        "warned_early": 1,
+        "detected_late": 5,
+        "missed": 41,
+        "warning_coverage": 0.02127659574468085,
+        "detection_coverage_any": 0.1276595744680851,
+        "mean_lead_seconds": 40.0,
+        "median_lead_seconds": 40.0,
+        "min_lead_seconds": 40.0,
+        "max_lead_seconds": 40.0,
+        "total_alerts": 10,
+        "false_alerts": 0,
+        "false_alerts_per_hour": 0.0,
+        "lookback_windows": 6,
+        "episodes": [
+          {
+            "start": 630,
+            "end": 719,
+            "status": "not_forecastable"
+          },
+          {
+            "start": 810,
+            "end": 899,
+            "status": "missed"
+          },
+          {
+            "start": 2430,
+            "end": 2519,
+            "status": "detected_late",
+            "delay_seconds": 120.0
+          },
+          {
+            "start": 2610,
+            "end": 2699,
+            "status": "missed"
+          },
+          {
+            "start": 6929,
+            "end": 6963,
+            "status": "not_forecastable"
+          },
+          {
+            "start": 6999,
+            "end": 7028,
+            "status": "missed"
+          },
+          {
+            "start": 10367,
+            "end": 10456,
+            "status": "missed"
+          },
+          {
+            "start": 10547,
+            "end": 10636,
+            "status": "missed"
+          },
+          {
+            "start": 12167,
+            "end": 12171,
+            "status": "missed"
+          },
+          {
+            "start": 12176,
+            "end": 12183,
+            "status": "missed"
+          },
+          {
+            "start": 12188,
+            "end": 12195,
+            "status": "warned_early",
+            "lead_seconds": 40.0
+          },
+          {
+            "start": 12200,
+            "end": 12207,
+            "status": "missed"
+          },
+          {
+            "start": 12212,
+            "end": 12219,
+            "status": "missed"
+          },
+          {
+            "start": 12224,
+            "end": 12231,
+            "status": "missed"
+          },
+          {
+            "start": 12236,
+            "end": 12244,
+            "status": "missed"
+          },
+          {
+            "start": 12248,
+            "end": 12256,
+            "status": "missed"
+          },
+          {
+            "start": 14754,
+            "end": 14754,
+            "status": "missed"
+          },
+          {
+            "start": 14771,
+            "end": 14771,
+            "status": "missed"
+          },
+          {
+            "start": 14783,
+            "end": 14783,
+            "status": "missed"
+          },
+          {
+            "start": 14794,
+            "end": 14794,
+            "status": "missed"
+          },
+          {
+            "start": 14806,
+            "end": 14806,
+            "status": "missed"
+          },
+          {
+            "start": 14817,
+            "end": 14817,
+            "status": "missed"
+          },
+          {
+            "start": 14823,
+            "end": 14823,
+            "status": "missed"
+          },
+          {
+            "start": 14829,
+            "end": 14829,
+            "status": "missed"
+          },
+          {
+            "start": 14835,
+            "end": 14835,
+            "status": "missed"
+          },
+          {
+            "start": 14946,
+            "end": 14946,
+            "status": "missed"
+          },
+          {
+            "start": 14957,
+            "end": 14957,
+            "status": "missed"
+          },
+          {
+            "start": 14986,
+            "end": 14986,
+            "status": "missed"
+          },
+          {
+            "start": 15010,
+            "end": 15010,
+            "status": "missed"
+          },
+          {
+            "start": 15015,
+            "end": 15015,
+            "status": "missed"
+          },
+          {
+            "start": 16430,
+            "end": 16431,
+            "status": "missed"
+          },
+          {
+            "start": 16436,
+            "end": 16436,
+            "status": "missed"
+          },
+          {
+            "start": 18044,
+            "end": 18044,
+            "status": "missed"
+          },
+          {
+            "start": 18050,
+            "end": 18050,
+            "status": "missed"
+          },
+          {
+            "start": 18061,
+            "end": 18061,
+            "status": "missed"
+          },
+          {
+            "start": 18090,
+            "end": 18090,
+            "status": "missed"
+          },
+          {
+            "start": 18102,
+            "end": 18107,
+            "status": "missed"
+          },
+          {
+            "start": 18113,
+            "end": 18113,
+            "status": "missed"
+          },
+          {
+            "start": 18125,
+            "end": 18125,
+            "status": "missed"
+          },
+          {
+            "start": 18130,
+            "end": 18130,
+            "status": "missed"
+          },
+          {
+            "start": 18234,
+            "end": 18234,
+            "status": "missed"
+          },
+          {
+            "start": 18246,
+            "end": 18246,
+            "status": "missed"
+          },
+          {
+            "start": 21580,
+            "end": 21648,
+            "status": "detected_late",
+            "delay_seconds": 40.0
+          },
+          {
+            "start": 22990,
+            "end": 23079,
+            "status": "not_forecastable"
+          },
+          {
+            "start": 23170,
+            "end": 23259,
+            "status": "detected_late",
+            "delay_seconds": 660.0
+          },
+          {
+            "start": 24790,
+            "end": 24879,
+            "status": "detected_late",
+            "delay_seconds": 160.0
+          },
+          {
+            "start": 24970,
+            "end": 25024,
+            "status": "missed"
+          },
+          {
+            "start": 26405,
+            "end": 26494,
+            "status": "not_forecastable"
+          },
+          {
+            "start": 26585,
+            "end": 26674,
+            "status": "missed"
+          },
+          {
+            "start": 28205,
+            "end": 28294,
+            "status": "detected_late",
+            "delay_seconds": 120.0
+          },
+          {
+            "start": 28385,
+            "end": 28474,
+            "status": "missed"
+          }
+        ],
+        "definition": "Lead time = episode start - alert opening time for alerts opened <= lookback windows before onset."
+      },
+      "note": "Same inputs / targets / split / threshold rule as the world model (direct multi-horizon forecasting)."
+    }
+  },
+  "seconds": 4.5
+}

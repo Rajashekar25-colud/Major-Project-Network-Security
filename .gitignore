@@ -1,0 +1,16 @@
+__pycache__/
+*.pyc
+.venv/
+venv/
+.pytest_cache/
+data/cache/
+data/states/cicids2018_states.csv
+data/processed/
+data/uploads/
+data/app.db
+*.log
+data/history/
+
+# local accounts and audit trail (never commit)
+data/users.json
+data/audit.jsonl

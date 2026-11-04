@@ -1,0 +1,33 @@
+digraph DFD {
+  graph [rankdir=TB, fontname="Helvetica", nodesep=0.9, ranksep=0.9, pad=0.3, bgcolor="white", splines=true, newrank=true];
+  node  [fontname="Helvetica", fontsize=13];
+  edge  [fontname="Helvetica", fontsize=11, color="#1f1e1d", arrowsize=0.8];
+
+  node [shape=box, style="filled", fillcolor="#fdf0ea", color="#c96442", penwidth=2, margin="0.25,0.15"];
+  NT [label="Network Traffic\nSource"]; SA [label="SOC Analyst"]; AD [label="Administrator"];
+
+  node [shape=circle, style=filled, fillcolor="#e1ecf6", color="#4a7fb5", penwidth=2, fixedsize=true, width=1.7, fontsize=12, margin=0];
+  P1 [label="1.0\nTraffic\nIngestion"]; P2 [label="2.0\nFeature\nProcessing"]; P3 [label="3.0\nAttack\nForecasting"];
+  P4 [label="4.0\nRisk & Warning\nAnalysis"]; P5 [label="5.0\nExplanation &\nATT&CK Analysis"]; P6 [label="6.0\nDashboard &\nReporting"];
+
+  D1 [shape=none, margin=0, fixedsize=false, width=0, height=0, label=<<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0" CELLPADDING="9" BGCOLOR="#dff0e5"><TR><TD SIDES="TB" BORDER="2" COLOR="#2f855a"><B>D1</B></TD><TD SIDES="TB" BORDER="2" COLOR="#2f855a" ALIGN="LEFT">Analysis, Model and Forecast Store<BR ALIGN="LEFT"/><FONT POINT-SIZE="10">models/ · data/history/ · data/users.json · data/audit.jsonl</FONT><BR ALIGN="LEFT"/></TD></TR></TABLE>>];
+
+  NT -> P1 [label="network traffic\n(CSV / PCAP / PCAPNG)"];
+  SA -> P1 [label="upload request"];
+  P1 -> P2 [label="validated\nflow records"];
+  P2 -> P3 [label="feature data,\nnetwork state"];
+  D1 -> P3 [label="trained model,\nscaler, config", style=dashed];
+  P3 -> P4 [label="multi-step forecast\n(probability, stage)"];
+  P4 -> P5 [label="risk score,\nalerts"];
+  P5 -> P6 [label="ATT&CK stage,\nexplanation"];
+  P4 -> P6 [label="risk score, alerts"];
+  P1 -> P6 [label="validation report"];
+  P3 -> D1 [label="analysis record\n+ windows"];
+  P4 -> D1 [label="alert counts,\npeak risk"];
+  D1 -> P6 [label="stored analyses, evaluation,\nmodel health"];
+  P6 -> D1 [label="accounts,\naudit events"];
+  P6 -> SA [label="forecast, alerts,\nATT&CK stage, explanations"];
+  AD -> P6 [label="user management,\nthreshold, model checks"];
+  P6 -> AD [label="users, all analyses,\naudit log, model health"];
+  {rank=same; NT; SA}
+}

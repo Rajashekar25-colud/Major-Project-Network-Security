@@ -1,0 +1,14 @@
+[theme]
+base = "light"
+primaryColor = "#c96442"
+backgroundColor = "#faf9f5"
+secondaryBackgroundColor = "#f3f1ea"
+textColor = "#1f1e1d"
+
+[server]
+headless = true
+maxUploadSize = 2000
+fileWatcherType = "none"
+
+[browser]
+gatherUsageStats = false

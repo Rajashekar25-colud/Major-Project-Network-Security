@@ -1,0 +1,140 @@
+classDiagram
+  direction LR
+  class UserStore {
+    -path : Path
+    -audit_path : Path
+    +ensure_admin() bool
+    +create_user(username, password, role) dict
+    +authenticate(username, password) dict
+    +change_password(username, old, new)
+    +reset_password(username, new, actor)
+    +set_active(username, active, actor)
+    +list_users() list
+  }
+  class TrafficReport {
+    +filename : str
+    +ok : bool
+    +checks : list~Check~
+    +stats : dict
+    +info : dict
+    +states : DataFrame
+    +error : str
+  }
+  class Check {
+    +name : str
+    +status : ok | warn | fail
+    +detail : str
+  }
+  class WindowAccumulator {
+    +add(chunk)
+    +finalize() DataFrame
+  }
+  class Preprocessor {
+    +names : list
+    +mean : ndarray
+    +std : ndarray
+    +active : ndarray
+    +fitted : bool
+    +fit(df)
+    +transform(df) ndarray
+  }
+  class WorldModel {
+    <<LSTM + temporal attention>>
+    +forward(x, need_attention) dict
+    +rollout(x, steps) dict
+  }
+  class TransformerWorldModel {
+    +forward(x, need_attention) dict
+  }
+  class Forecaster {
+    +L : int
+    +H : int
+    +wsec : int
+    +threshold : float
+    +meta : dict
+    +load(models_dir) Forecaster
+    +validate(states) dict
+    +scale(states) ndarray
+    +predict_batch(X, ends) dict
+    +decode(attack_prob, stage_prob, thr) dict
+  }
+  class ReplaySession {
+    +states : DataFrame
+    +ends : ndarray
+    +attack_prob : ndarray
+    +stage_prob : ndarray
+    +thr : float
+    +step(n) int
+    +set_threshold(thr)
+    +sequence(k) ndarray
+  }
+  class WarningEngine {
+    +thr : float
+    +alerts : list~Alert~
+    +level_of(risk) str
+    +update(idx, time, risk, stage, probs) dict
+    +new_segment(idx, time)
+  }
+  class Alert {
+    +id : int
+    +stage : str
+    +severity : str
+    +opened_time
+    +closed_time
+    +peak_risk : float
+    +eta_seconds : float
+    +status : OPEN | CLOSED
+    +stages : list
+    +n_windows : int
+  }
+  class AnalysisResult {
+    +id : str
+    +name : str
+    +created : datetime
+    +states : DataFrame
+    +thr : float
+    +stats : dict
+    +labelled : bool
+    +integrity_before : dict
+    +integrity_after : dict
+  }
+  class AnalysisHistory {
+    <<module history.py>>
+    +save_analysis(res, owner)
+    +list_history(owner) list
+    +load_states(id) DataFrame
+    +delete_analysis(id)
+  }
+  class Explainer {
+    <<module explainer.py>>
+    +explain_window(fc, seq, top_k, horizon_idx) dict
+    +explain_shap(fc, seq, background) dict
+  }
+  class EvaluationMetrics {
+    <<module metrics.py / validation.py>>
+    +binary_metrics(y, p, thr) dict
+    +lead_time_report(...) dict
+    +validate_forecast(res) dict
+  }
+  class ModelIntegrity {
+    <<module integrity.py>>
+    +fingerprint(models_dir) dict
+    +unchanged(before, after) bool
+  }
+
+  TrafficReport "1" *-- "1..*" Check : contains
+  TrafficReport ..> WindowAccumulator : builds states with
+  TrafficReport ..> Forecaster : validate(states)
+  Forecaster "1" *-- "1" WorldModel : wraps
+  Forecaster "1" *-- "1" Preprocessor : scales with
+  WorldModel <|-- TransformerWorldModel
+  ReplaySession "1" o-- "1" Forecaster : uses
+  ReplaySession "1" *-- "1" WarningEngine : drives
+  WarningEngine "1" o-- "0..*" Alert : raises
+  AnalysisResult "1" *-- "1" ReplaySession : holds
+  AnalysisResult ..> ModelIntegrity : checks before/after
+  AnalysisHistory ..> AnalysisResult : persists
+  AnalysisHistory ..> UserStore : owner = username
+  Explainer ..> Forecaster : gradients, attention
+  Explainer ..> ReplaySession : sequence(k)
+  EvaluationMetrics ..> AnalysisResult : labelled windows

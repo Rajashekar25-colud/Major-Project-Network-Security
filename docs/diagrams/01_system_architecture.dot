@@ -1,0 +1,63 @@
+digraph ARCH {
+  graph [rankdir=TB, fontname="Helvetica", fontsize=13, nodesep=0.35, ranksep=0.55, compound=true, pad=0.3, bgcolor="white", newrank=true];
+  node  [shape=box, style="rounded,filled", fontname="Helvetica", fontsize=12, margin="0.18,0.10", color="#6b6a68", fillcolor="#ffffff"];
+  edge  [color="#4a4946", arrowsize=0.8, fontname="Helvetica", fontsize=10];
+
+  SRC [label="Network traffic source\nCSV flow records · PCAP · PCAPNG", fillcolor="#ffffff", penwidth=1.6];
+
+  subgraph cluster_ui { label="PRESENTATION LAYER · Streamlit (app/)"; style="rounded,filled"; fillcolor="#fbf3ee"; color="#c96442"; labeljust=l; fontsize=12;
+    LOGIN [label="Sign-in / Register\nauth_pages.py", fillcolor="#f6e9e3", color="#c96442"];
+    ANALYST [label="Analyst pages\nNew Analysis · Overview · Traffic · Forecast\nAlerts · Explain · ATT&CK · Validation · History", fillcolor="#f6e9e3", color="#c96442"];
+    ADMIN [label="Administrator pages\nDashboard · Users · All Analyses\nAudit Log · Model Health · Evaluation", fillcolor="#f6e9e3", color="#c96442"];
+    {rank=same; LOGIN; ANALYST; ADMIN}
+  }
+
+  subgraph cluster_wf { label="APPLICATION SERVICES · src/auth · src/analysis"; style="rounded,filled"; fillcolor="#f2f7fb"; color="#4a7fb5"; labeljust=l; fontsize=12;
+    AUTH [label="UserStore (src/auth)\nPBKDF2 hashing · roles\nlock-out · audit log", fillcolor="#e1ecf6", color="#4a7fb5"];
+    ING [label="ingest.py\nvalidate traffic", fillcolor="#e1ecf6", color="#4a7fb5"];
+    FLOW [label="workflow.py\nrun_analysis · alert views\nATT&CK mapping", fillcolor="#e1ecf6", color="#4a7fb5"];
+    VAL [label="validation.py\nforecast vs actual", fillcolor="#e1ecf6", color="#4a7fb5"];
+    HIST [label="history.py · integrity.py\nanalysis store · SHA-256\nmodel fingerprint", fillcolor="#e1ecf6", color="#4a7fb5"];
+    {rank=same; AUTH; ING; FLOW; VAL; HIST}
+  }
+
+  subgraph cluster_data { label="DATA AND FEATURES · src/data · src/features"; style="rounded,filled"; fillcolor="#f2f7fb"; color="#4a7fb5"; labeljust=l; fontsize=12;
+    PARSE [label="flows.py · pcap.py\nread flow records / packets", fillcolor="#e1ecf6", color="#4a7fb5"];
+    WIN [label="windows.py\n10 s time-window network state", fillcolor="#e1ecf6", color="#4a7fb5"];
+    PRE [label="preprocess.py\ntrain-only scaler\nfeature compatibility check", fillcolor="#e1ecf6", color="#4a7fb5"];
+    {rank=same; PARSE; WIN; PRE}
+  }
+
+  subgraph cluster_ml { label="FORECASTING AND WARNING · src/models · src/replay · src/warning"; style="rounded,filled"; fillcolor="#f7f3fb"; color="#7a5fb0"; labeljust=l; fontsize=12;
+    REP [label="ReplaySession\nwindow-by-window replay", fillcolor="#ebe3f5", color="#7a5fb0"];
+    INF [label="Forecaster\ninference · stage decode", fillcolor="#ebe3f5", color="#7a5fb0"];
+    MODEL [label="WorldModel\nLSTM + temporal attention\nK-step heads", fillcolor="#ebe3f5", color="#7a5fb0"];
+    WARN [label="WarningEngine\nthreshold · persistence · hysteresis\ncooldown · de-duplication · escalation", fillcolor="#ebe3f5", color="#7a5fb0"];
+    {rank=same; REP; INF; MODEL; WARN}
+  }
+
+  subgraph cluster_xai { label="EXPLAINABILITY AND EVALUATION · src/explain · src/evaluation"; style="rounded,filled"; fillcolor="#f7f3fb"; color="#7a5fb0"; labeljust=l; fontsize=12;
+    EXP [label="explainer.py\ntemporal attention · gradient x input · SHAP", fillcolor="#ebe3f5", color="#7a5fb0"];
+    EVAL [label="metrics.py · evaluate.py\nprecision · recall · F1 · PR-AUC · lead time", fillcolor="#ebe3f5", color="#7a5fb0"];
+    {rank=same; EXP; EVAL}
+  }
+
+  subgraph cluster_store { label="LOCAL STORAGE · files only, no database server"; style="rounded,filled"; fillcolor="#f1f8f3"; color="#2f855a"; labeljust=l; fontsize=12;
+    F1 [shape=cylinder, style=filled, label="models/\nworld_model.pt · metadata.json\nevaluation.json · background_sequences.npy", fillcolor="#dff0e5", color="#2f855a"];
+    F2 [shape=cylinder, style=filled, label="data/history/\nanalysis .json + states .csv.gz", fillcolor="#dff0e5", color="#2f855a"];
+    F3 [shape=cylinder, style=filled, label="data/users.json\ndata/audit.jsonl", fillcolor="#dff0e5", color="#2f855a"];
+    F4 [shape=cylinder, style=filled, label="configs/config.yaml\nwindows · thresholds · ATT&CK mapping", fillcolor="#dff0e5", color="#2f855a"];
+    {rank=same; F1; F2; F3; F4}
+  }
+
+  SRC -> ANALYST [label=" upload"];
+  LOGIN -> AUTH; ADMIN -> AUTH; ADMIN -> HIST;
+  ANALYST -> ING; ANALYST -> FLOW;
+  ING -> PARSE; PARSE -> WIN [constraint=false]; WIN -> PRE [constraint=false];
+  FLOW -> REP; FLOW -> EXP; VAL -> EVAL;
+  PRE -> INF [label=" scaled windows"];
+  REP -> INF [constraint=false]; INF -> MODEL [constraint=false]; REP -> WARN [constraint=false];
+  INF -> F1 [style=dashed, label=" reads"]; EVAL -> F1 [style=dashed];
+  HIST -> F2 [style=dashed, label=" reads / writes"]; AUTH -> F3 [style=dashed, label=" reads / writes"];
+  WIN -> F4 [style=dashed, label=" reads"]; WARN -> F4 [style=dashed];
+}

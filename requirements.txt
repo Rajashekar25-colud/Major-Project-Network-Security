@@ -1,0 +1,10 @@
+numpy>=1.26
+pandas>=2.1
+scikit-learn>=1.3
+pyyaml>=6.0
+torch>=2.2
+streamlit>=1.38
+plotly>=5.20
+shap>=0.45          # optional: exact SHAP values in the Explanation tab
+pytest>=8.0         # for the test-suite
+# scapy>=2.5        # optional: only needed for .pcapng captures

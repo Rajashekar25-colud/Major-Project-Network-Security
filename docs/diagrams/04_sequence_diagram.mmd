@@ -1,0 +1,43 @@
+sequenceDiagram
+  autonumber
+  actor U as Analyst
+  participant UI as Streamlit UI<br/>(new_analysis.py)
+  participant IN as Traffic Ingestion<br/>(ingest.py · service.py)
+  participant FE as Feature Extraction<br/>(windows.py · preprocess.py)
+  participant WF as Analysis Workflow<br/>(workflow.py)
+  participant FC as Forecaster / Model<br/>(LSTM + attention)
+  participant WE as Warning Engine
+  participant HS as History Store<br/>(data/history)
+  participant DB as Dashboard Pages
+
+  U->>UI: Upload CSV / PCAP / PCAPNG
+  UI->>IN: inspect_traffic(name, bytes)
+  IN->>FE: states_from_upload(): flows to 10 s windows
+  FE-->>IN: network-state table
+  IN->>FC: validate(states): feature compatibility
+  FC-->>IN: feature report
+  IN-->>UI: TrafficReport (checks, records, range, windows)
+  UI-->>U: Traffic ready
+  U->>UI: Begin Analysis
+  UI->>WF: run_analysis(states, forecaster, config, threshold)
+  WF->>FC: scale(states), predict_batch(windows)
+  FC-->>WF: attack probability + stage probability (K steps)
+  WF->>FC: decode(): risk, headline ATT&CK stage
+  FC-->>WF: per-window risk and stage
+  loop every forecast window
+    WF->>WE: update(window, risk, stage, probs)
+    WE-->>WF: level, opened / escalated / closed events
+  end
+  WF-->>UI: AnalysisResult (progress reported at each stage)
+  UI->>HS: save_analysis(result, owner)
+  HS-->>UI: stored
+  UI->>DB: open Overview
+  DB-->>U: state, risk, stage, forecast window, alerts
+  opt user opens Explain or ATT&CK
+    U->>DB: select forecast step
+    DB->>WF: explain_step(k, step) / attack_mapping(stage)
+    WF->>FC: attention + gradient x input (SHAP on request)
+    FC-->>WF: feature attributions
+    WF-->>DB: explanation, ATT&CK tactic
+    DB-->>U: charts and evidence
+  end
